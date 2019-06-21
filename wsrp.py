@@ -7,21 +7,21 @@ import json
 def mount_graph():
     
     theGraph = nx.DiGraph()
-    theGraph.add_node('pa1', id=1, time=1, service='pedreiro')
-    theGraph.add_node('pb1', id=2, time=1, service='pedreiro')
-    theGraph.add_node('pb2', id=3, time=1, service='pedreiro')
+    theGraph.add_node('pa1', id=1, local='A', time=1, team='pedreiro', build='A')
+    theGraph.add_node('pb1', id=2, local='B', time=1, team='pedreiro', build='B')
+    theGraph.add_node('pb2', id=3, local='B', time=1, team='pedreiro', build='B')
 
-    theGraph.add_node('ea1', id=4, time=1, service='encanador')
-    theGraph.add_node('ea2', id=5, time=1, service='encanador')
-    theGraph.add_node('eb1', id=6, time=1, service='encanador')
-    theGraph.add_node('eb2', id=7, time=1, service='encanador')
-    theGraph.add_node('eb3', id=8, time=1, service='encanador')
+    theGraph.add_node('ea1', id=4, local='A', time=1, team='encanador', build='A')
+    theGraph.add_node('ea2', id=5, local='A', time=1, team='encanador', build='A')
+    theGraph.add_node('eb1', id=6, local='B', time=1, team='encanador', build='B')
+    theGraph.add_node('eb2', id=7, local='B', time=1, team='encanador', build='B')
+    theGraph.add_node('eb3', id=8, local='B', time=1, team='encanador', build='B')
 
-    theGraph.add_node('la1', id=9, time=1, service='eletricista')
-    theGraph.add_node('la2', id=10, time=1, service='eletricista')
-    theGraph.add_node('lb1', id=11, time=1, service='eletricista')
-    theGraph.add_node('lb2', id=12, time=1, service='eletricista')
-    theGraph.add_node('lb3', id=13, time=1, service='eletricista')
+    theGraph.add_node('la1', id=9, local='A', time=1, team='eletricista', build='A')
+    theGraph.add_node('la2', id=10, local='A', time=1, team='eletricista', build='A')
+    theGraph.add_node('lb1', id=11, local='B', time=1, team='eletricista', build='B')
+    theGraph.add_node('lb2', id=12, local='B', time=1, team='eletricista', build='B')
+    theGraph.add_node('lb3', id=13, local='B', time=1, team='eletricista', build='B')
     
     theGraph.add_edge('pa1','ea1')
     theGraph.add_edge('pa1','ea2')
@@ -48,7 +48,7 @@ def export_graph(theGraph, distances, name):
         'distances': data_distances,
         'graph': data_graph
     }
-    
+
     with open("graphs\\" + name + ".txt", 'w+') as outfile:  
         json.dump(data, outfile)
 
@@ -108,12 +108,12 @@ def generate_wsrp_matrix(theGraph, order):
         current_node = theGraph.nodes[order[i]]
         if not current_node['scheduled']:
             day = []
-            services_day = []            
+            teams_day = []            
             day.append(order[i])
-            services_day.append(current_node['service'])
+            teams_day.append(current_node['team'])
             for j in range(i, n_nodes):
                 #print('\t', order[j], theGraph.nodes[order[j]])
-                if theGraph.nodes[order[j]]['service'] not in services_day and not theGraph.nodes[order[j]]['scheduled']:
+                if theGraph.nodes[order[j]]['team'] not in teams_day and not theGraph.nodes[order[j]]['scheduled']:
                     previous = theGraph.out_degree[order[j]]
                     to_schedule = True
                     #print('previous', previous)
@@ -124,9 +124,9 @@ def generate_wsrp_matrix(theGraph, order):
                             break
                     if to_schedule:
                         #print('insere grafo:', order[j])
-                        #print(current_node['service'], theGraph.nodes[order[j]]['service'])
+                        #print(current_node['team'], theGraph.nodes[order[j]]['team'])
                         day.append(order[j])
-                        services_day.append(theGraph.nodes[order[j]]['service'])
+                        teams_day.append(theGraph.nodes[order[j]]['team'])
             #print(day)
             for node in day:
                 theGraph.nodes[node]['scheduled'] = True
@@ -136,17 +136,25 @@ def generate_wsrp_matrix(theGraph, order):
 
 if __name__ == '__main__':
 
-    #theGraph, distances = mount_graph()
+    theGraph, distances = mount_graph()
     #export_graph(theGraph, distances, 'exemplo4')
     
-    theGraph, distances = import_graph('exemplo4')
-    print(distances)
+    #theGraph, distances = import_graph('exemplo4')
+    #print(distances)
     #plot_graph(theGraph)
     
-    #order = topological_sort(theGraph)
+    order = topological_sort(theGraph)
     #order = ['pa1', 'pb1', 'ea1', 'ea2', 'pb2', 'eb1', 'eb2', 'la1', 'la2', 'eb3', 'lb1', 'lb2', 'lb3']
     #show(theGraph, order)
     
-    #schedules = generate_wsrp_matrix(theGraph, order)
-    #print(schedules)
-    #print(order)
+    schedules = generate_wsrp_matrix(theGraph, order)
+    print('ordenação topologica:')
+    print(order, '\n')
+    print('matriz de schedules:')
+    
+    for i in range(len(schedules)):
+        print('dia:', i+1)
+        for activity in schedules[i]:
+            print('\t', activity, theGraph.nodes[activity]['local'], theGraph.nodes[activity]['team'])
+
+    
