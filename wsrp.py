@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 from queue import deque
 import json
 
@@ -35,24 +36,34 @@ def mount_graph():
     theGraph.add_edge('eb2','lb2')
     theGraph.add_edge('eb3','lb3')
 
-    return theGraph
+    distances = np.zeros((2,2), dtype=int)
+    distances[:] = 1
 
-def export_graph(theGraph, name):
-    data = nx.json_graph.node_link_data(theGraph)
+    return theGraph, distances
+
+def export_graph(theGraph, distances, name):
+    data_graph = nx.json_graph.node_link_data(theGraph)
+    data_distances = distances.tolist()
+    data = {
+        'distances': data_distances,
+        'graph': data_graph
+    }
+    
     with open("graphs\\" + name + ".txt", 'w+') as outfile:  
         json.dump(data, outfile)
 
 def import_graph(name):
     with open("graphs\\" + name + ".txt") as json_file:  
         data = json.load(json_file)
-        H = nx.json_graph.node_link_graph(data)
-        return H
+        print(data['distances'])
+        #print(data['graph'])
+        graph = nx.json_graph.node_link_graph(data['graph'])
+        return graph, data['distances']
 
 def plot_graph(theGraph):
     nx.draw(theGraph)
     plt.subplot(121)
-    nx.draw(theGraph, with_labels=True, font_weight='bold')
-    plt.subplot(122)
+    nx.draw(theGraph, with_labels=True)    
     plt.show()
 
 def topological_sort(theGraph):
@@ -125,16 +136,17 @@ def generate_wsrp_matrix(theGraph, order):
 
 if __name__ == '__main__':
 
-    theGraph = mount_graph()
-    export_graph(theGraph, 'exemplo3')
+    #theGraph, distances = mount_graph()
+    #export_graph(theGraph, distances, 'exemplo4')
     
-    #theGraph = import_graph('exemplo3')
-    plot_graph(theGraph)
+    theGraph, distances = import_graph('exemplo4')
+    print(distances)
+    #plot_graph(theGraph)
     
-    order = topological_sort(theGraph)
+    #order = topological_sort(theGraph)
     #order = ['pa1', 'pb1', 'ea1', 'ea2', 'pb2', 'eb1', 'eb2', 'la1', 'la2', 'eb3', 'lb1', 'lb2', 'lb3']
     #show(theGraph, order)
     
-    schedules = generate_wsrp_matrix(theGraph, order)
-    print(schedules)
-    print(order)
+    #schedules = generate_wsrp_matrix(theGraph, order)
+    #print(schedules)
+    #print(order)
