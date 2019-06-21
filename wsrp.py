@@ -92,32 +92,32 @@ def generate_wsrp_matrix(theGraph, order):
     
     schedules = []
     for i in range(n_nodes):
-        print('--------------------')
-        print(theGraph.nodes[order[i]])
+        #print('--------------------')
+        #print(theGraph.nodes[order[i]])
         current_node = theGraph.nodes[order[i]]
         if not current_node['scheduled']:
             day = []
+            services_day = []            
+            day.append(order[i])
+            services_day.append(current_node['service'])
             for j in range(i, n_nodes):
-                print('\t', order[j], theGraph.nodes[order[j]])
-                if current_node == theGraph.nodes[order[j]]:
-                    print('insere grafo:', order[j])
-                    day.append(order[j])
-                elif current_node['service'] != theGraph.nodes[order[j]]['service']:
+                #print('\t', order[j], theGraph.nodes[order[j]])
+                if theGraph.nodes[order[j]]['service'] not in services_day and not theGraph.nodes[order[j]]['scheduled']:
                     previous = theGraph.out_degree[order[j]]
                     to_schedule = True
-                    print('previous', previous)
+                    #print('previous', previous)
                     for previous in theGraph.pred[order[j]]:
-                        print(theGraph.nodes[previous])
+                        #print(theGraph.nodes[previous])
                         if not theGraph.nodes[previous]['scheduled']:
                             to_schedule = False
                             break
                     if to_schedule:
-                        print('insere grafo:', order[j])
+                        #print('insere grafo:', order[j])
+                        #print(current_node['service'], theGraph.nodes[order[j]]['service'])
                         day.append(order[j])
-            print(day)
+                        services_day.append(theGraph.nodes[order[j]]['service'])
+            #print(day)
             for node in day:
-                print(node)
-                print(theGraph.nodes[node])
                 theGraph.nodes[node]['scheduled'] = True
 
             schedules.append(day)
@@ -129,11 +129,12 @@ if __name__ == '__main__':
     export_graph(theGraph, 'exemplo3')
     
     #theGraph = import_graph('exemplo3')
-    #plot_graph(theGraph)
+    plot_graph(theGraph)
     
-    #order = topological_sort(theGraph)
+    order = topological_sort(theGraph)
     #order = ['pa1', 'pb1', 'ea1', 'ea2', 'pb2', 'eb1', 'eb2', 'la1', 'la2', 'eb3', 'lb1', 'lb2', 'lb3']
     #show(theGraph, order)
     
-    #schedules = generate_wsrp_matrix(theGraph, order)
-    #print(schedules)
+    schedules = generate_wsrp_matrix(theGraph, order)
+    print(schedules)
+    print(order)
