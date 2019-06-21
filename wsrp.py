@@ -6,21 +6,21 @@ import json
 def mount_graph():
     
     theGraph = nx.DiGraph()
-    theGraph.add_node('pa1', time=1, service='pedreiro')
-    theGraph.add_node('pb1', time=1, service='pedreiro')
-    theGraph.add_node('pb2', time=1, service='pedreiro')
+    theGraph.add_node('pa1', id=1, time=1, service='pedreiro')
+    theGraph.add_node('pb1', id=2, time=1, service='pedreiro')
+    theGraph.add_node('pb2', id=3, time=1, service='pedreiro')
 
-    theGraph.add_node('ea1', time=1, service='encanador')
-    theGraph.add_node('ea2', time=1, service='encanador')
-    theGraph.add_node('eb1', time=1, service='encanador')
-    theGraph.add_node('eb2', time=1, service='encanador')
-    theGraph.add_node('eb3', time=1, service='encanador')
+    theGraph.add_node('ea1', id=4, time=1, service='encanador')
+    theGraph.add_node('ea2', id=5, time=1, service='encanador')
+    theGraph.add_node('eb1', id=6, time=1, service='encanador')
+    theGraph.add_node('eb2', id=7, time=1, service='encanador')
+    theGraph.add_node('eb3', id=8, time=1, service='encanador')
 
-    theGraph.add_node('la1', time=1, service='eletricista')
-    theGraph.add_node('la2', time=1, service='eletricista')
-    theGraph.add_node('lb1', time=1, service='eletricista')
-    theGraph.add_node('lb2', time=1, service='eletricista')
-    theGraph.add_node('lb3', time=1, service='eletricista')
+    theGraph.add_node('la1', id=9, time=1, service='eletricista')
+    theGraph.add_node('la2', id=10, time=1, service='eletricista')
+    theGraph.add_node('lb1', id=11, time=1, service='eletricista')
+    theGraph.add_node('lb2', id=12, time=1, service='eletricista')
+    theGraph.add_node('lb3', id=13, time=1, service='eletricista')
     
     theGraph.add_edge('pa1','ea1')
     theGraph.add_edge('pa1','ea2')
@@ -80,21 +80,60 @@ def show(theGraph, order):
         print(current)
 
 def generate_wsrp_matrix(theGraph, order):
+    
     n_nodes = len(theGraph)
+    for i in range(n_nodes):
+        node = theGraph.nodes[order[i]] 
+        node['scheduled'] = False
+        
+    for i in range(n_nodes):
+        node = theGraph.nodes[order[i]]
+        print(node)
+    
+    schedules = []
     for i in range(n_nodes):
         print('--------------------')
         print(theGraph.nodes[order[i]])
-        for j in range(i, n_nodes):
-            print('\t', theGraph.nodes[order[j]])
+        current_node = theGraph.nodes[order[i]]
+        if not current_node['scheduled']:
+            day = []
+            for j in range(i, n_nodes):
+                print('\t', order[j], theGraph.nodes[order[j]])
+                if current_node == theGraph.nodes[order[j]]:
+                    print('insere grafo:', order[j])
+                    day.append(order[j])
+                elif current_node['service'] != theGraph.nodes[order[j]]['service']:
+                    previous = theGraph.out_degree[order[j]]
+                    to_schedule = True
+                    print('previous', previous)
+                    for previous in theGraph.pred[order[j]]:
+                        print(theGraph.nodes[previous])
+                        if not theGraph.nodes[previous]['scheduled']:
+                            to_schedule = False
+                            break
+                    if to_schedule:
+                        print('insere grafo:', order[j])
+                        day.append(order[j])
+            print(day)
+            for node in day:
+                print(node)
+                print(theGraph.nodes[node])
+                theGraph.nodes[node]['scheduled'] = True
+
+            schedules.append(day)
+    return schedules
 
 if __name__ == '__main__':
 
-    #theGraph = mount_graph()
-    #export_graph(theGraph, 'exemplo3')
+    theGraph = mount_graph()
+    export_graph(theGraph, 'exemplo3')
     
-    theGraph = import_graph('exemplo3')
-    plot_graph(theGraph)
-    order = topological_sort(theGraph)
-    show(theGraph, order)
-    #generate_wsrp_matrix(theGraph, order)
+    #theGraph = import_graph('exemplo3')
+    #plot_graph(theGraph)
     
+    #order = topological_sort(theGraph)
+    #order = ['pa1', 'pb1', 'ea1', 'ea2', 'pb2', 'eb1', 'eb2', 'la1', 'la2', 'eb3', 'lb1', 'lb2', 'lb3']
+    #show(theGraph, order)
+    
+    #schedules = generate_wsrp_matrix(theGraph, order)
+    #print(schedules)
