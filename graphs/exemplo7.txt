@@ -1,0 +1,1 @@
+{"distances": [[1, 1], [1, 1]], "graph": {"directed": true, "multigraph": false, "graph": {}, "nodes": [{"id": "Pb1", "local": "B", "time": 1, "team": "pedreiro", "build": "1"}, {"id": "Pa1", "local": "A", "time": 1, "team": "pedreiro", "build": "1"}, {"id": "En1", "local": "A", "time": 1, "team": "encanador", "build": "1"}], "links": [{"source": "Pa1", "target": "En1"}]}}
